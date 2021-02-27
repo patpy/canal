@@ -1,0 +1,113 @@
+
+// Copyrights Patrick Kasi - April 2020
+
+/*! \mainpage High Pass Butterworth filter main page
+ *
+ * \section Butterworth filters ...
+ *
+ * This is the introduction.
+ *
+ * \section install_sec Installation
+ *
+ * \subsection step1 Step 1: Opening the box
+ *
+ * etc...
+ */
+
+/**
+ *   
+ *@file butter_hp.hpp 
+ *
+ * 
+ * \brief Butterworth High Pass Filter Design filter class
+ *
+ * This class implements a specific IIR filter: the Butterworth Hight Pass Filter! For example:
+ *
+ *     \code{.cpp}
+ *     int order = 5, nn = 95;
+ *     double fc = 1000, fs = 32000;
+ *     mtco::MathVector<double> b, a, x(nn), y(nn);
+ *     std::vector<double> xx(nn), yy(nn);
+ *     // Impulse response of filter
+ *     x.set(0, 1.0);
+ *     dsp_lib::iir_lib::ButterHighPass<double> bhpf(order, fc, fs);
+ *     blpf.design();
+ *     a = dsp_lib::iir_lib::GetFilter_a_Coeffs(bhpf);
+ *     b = dsp_lib::iir_lib::GetFilter_b_Coeffs(bhpf);
+ *     std::cout<< "Printing 'b' coefficients" <<"\n";
+ *     mtco::disp_vector(b);
+ *     std::cout<< "\n" << "Printing 'a' coefficients" <<"\n";
+ *     mtco::disp_vector(a);
+ *     y = dspo::Filter(b, a, x);
+ *     // Now plot impulse response
+ *     for (int i = 0; i< nn; i++) {
+ *      yy[i] = y[i];
+ *      xx[i] = double(i)/fs*1000;
+ *     }
+ *     plt::plot(xx,yy, "b");
+ *     plt::ylabel("Power");
+ *     plt::xlabel("Time (ms)");
+ *     plt::grid("True");
+ *     plt::save("./impulse_response.png");
+ *     plt::show();
+ *     \endcode
+ *
+ *@note This that the code snipped above relies on the a python's matplot lib lib to generate figures: the user must have this library to successfully run the code; otherwise comment out the lines of code related to plotting.
+ *
+ *\cite blinchikoff1976filtering
+ *
+ *\author Patrick Kasi
+ *
+ * \version 1.0 $Revision: 1.0 $
+ *
+ * \date 2020/04/20
+ *
+ * Contact: pkasi@yahoo.com
+ *
+ *@include iir_base.hpp 
+ *
+ * 
+ *
+ */
+
+
+
+# ifndef BUTTER_HIGHPASS_H
+# define BUTTER_HIGHPASS_H
+
+
+#include "iir_base.hpp"
+
+namespace canal {
+namespace dsp {
+
+template<class T> class ButterHighPass : public IIRBase<T>{
+ public:
+ 
+ButterHighPass(int);
+ButterHighPass(int, const T&, const T&);
+virtual IIRBase<T>* clone() const;
+
+virtual ~ButterHighPass() {
+    }
+
+   /**
+    *@brief Member function that displays filter coeffcients at the console.
+   */
+void print();
+
+  /**
+   * \brief Member function that derives Butterworth Low Pass filter coefficients.
+   * 
+   *
+   */
+void design() override;
+};
+
+
+
+} // End dsp namespace
+} // End canal namespace
+
+ #include "butter_hp.cpp"
+#endif

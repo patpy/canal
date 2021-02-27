@@ -1,0 +1,89 @@
+#include <stats.hpp>
+#include <matplotlibcpp.h>
+#include <iostream>
+#include <vector>
+#include <math.hpp>
+ 
+
+
+
+namespace plt = matplotlibcpp;
+int main(int argc, char *argv[])
+{
+  
+  unsigned int vl = 3, n_grn = 200;
+  
+  //vector<double> x(n), y(n), xx(n),yy(n), xpdf(n), pdf(n);
+  canal::math::Vector<double> u(n_grn);
+  std::vector<double>grv(n_grn), x_vec(n_grn), pdf(n_grn), yy(n_grn);
+  
+  canal::stats::RandomParkMiller<double> rnd(n_grn);
+  rnd.get_uniform(u);
+  
+  //Now display the first three uniform random number generated
+  for (unsigned int i = 0; i < vl; i++) {
+    std::cout<<u[i]<<"\n";    
+  }
+  
+  
+  //Put data in standard vector
+  for(unsigned int i = 0; i < n_grn; i++)
+  {   
+    grv.at(i) = canal::stats::InverseCumulativeNormal(u[i]);
+    pdf.at(i) = canal::stats::NormalDensity(grv[i]);
+    x_vec.at(i) = double(i);    
+  }
+
+  //plot Gaussian random variable
+  plt::plot(grv, pdf, "b.");
+  plt::xlabel("Standard Gaussian RND Variable");
+  plt::ylabel("pdf");
+  plt::xlim(-5, 5);
+  plt::save("./gauss_rnd.png");
+  plt::show();
+
+  //Implement a 1 D kalman filter. This process involves simulating Gaussian random variables (testing Guassian random generator)
+
+  // values near the mean are the most likely
+  // standard deviation affects the dispersion of generated values from the mean
+  
+  //Now modify grv to obtain non stationary data
+  for(unsigned int i =0; i<n_grn; i++){
+    
+    if(i < n_grn/2){
+      grv.at(i) = 4 + grv[i];
+    }else{
+      grv.at(i) = 12 + grv[i];
+    }
+    
+    
+  }
+
+  
+  //define Bayseian filter-1D Kalman filter
+  double sigma = 0.11, sig=0.1;
+  double u0 = 15, ut = 0, sigt=1, rt, et, K;
+  yy.at(0) = u0;
+  for(unsigned int j=1; j < n_grn; j++)
+    {
+       rt = sigma + sig;
+       et = grv.at(j) - yy.at(j-1);
+       sigt = rt*sigma/(rt + sigma);
+       K = rt/(sigma + rt);
+      yy.at(j) = yy.at(j-1) + K*et;
+     
+    }
+  //plot(x,y);
+  plt::plot(x_vec, grv, "rx");
+  plt:: plot(x_vec, yy);
+  plt::xlabel("Time(Samples)");
+  plt::ylabel("Non stationary mean");
+  //plt::legend( );
+  
+  //plt::xlim(-5, 5);
+  plt::save("./kalman_est.png");
+  plt::show();
+  
+  return 0;
+}
+

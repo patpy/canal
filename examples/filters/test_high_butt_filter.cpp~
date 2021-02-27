@@ -1,0 +1,75 @@
+
+#include <iostream>
+#include <vector>
+#include<string>
+#include <matplotlibcpp.h>
+#include <dsp.hpp>
+namespace plt = matplotlibcpp;
+/*
+  ---------------IMPULSE RESPONSE OF BUTTERWORTH LOW PASS FILTER---------------------
+
+*/
+
+int main() {
+  std::cout<< "Hello Butterworth Low Pass Filter Design" << "\n";
+  
+  std::string colors[] = {"b", "g", "r"};
+  int order[] = {2, 3, 5}, n = 3, nn = 96;
+
+  // 1 kHz cutt-off
+  double fc = 1000;
+
+  // 32 kHz sampling
+  double fs = 32000;
+  csl::col::MathVector<double> b, a, x(nn), y(nn);
+  std::vector<double> xx(nn), yy(nn);
+  // std::tuple<csl::col::MathVector<double>, csl::col::MathVector<csl::mfl::Complex<double>> > freqz_data; 
+  // Generate impulse function
+  x.set(0, 1.0);
+  
+  // plt::figure(1);
+  // plt::axis("111");
+  // plt::hold("True");
+  
+  for (int h = 0; h < n; h++) {
+    csl::spl::ButterLowPass<double> blpf(order[h], fc, fs);
+    blpf.design();
+  
+    a = csl::spl::filt_a_coef_fun(blpf);
+    b = csl::spl::filt_b_coef_fun(blpf);
+
+    std::cout<< "Printing 'b' coefficients" <<"\n";
+    csl::col::disp_vec_fun(b);
+    std::cout<< "\n" << "Printing 'a' coefficients" <<"\n";
+    csl::col::disp_vec_fun(a);
+    y = csl::spl::filter_fun(b, a, x);
+  
+    // Now plot impulse response
+    for (int i = 0; i < nn; i++) {
+      yy[i] = y[i];
+      xx[i] = double(i)/fs*1000;
+    }
+
+    plt::plot(xx,yy, colors[h]);
+  }
+  // end for loop
+  
+   plt::ylabel("Power");
+   plt::xlabel("Time (ms)");
+   plt::grid("True");
+   plt::save("./impulse_response.png");
+   plt::show();
+
+
+
+   // Do freqz analysis
+   
+   //freqz_data = csl::spl::freqz_fun(b, a, fs, 512);
+   
+  
+  return 0;
+}
+
+
+// g++ -W -g -std=c++14 -I /home/patrick/COMP167/CompSci/ -I /home/patrick/COMP167/CompSci/dsp/iirFilter/ -I /home/patrick/COMP167/CompSci/math/ -I /home/patrick/COMP167/CompSci/math/vector/ -I /home/patrick/COMP167/CompSci/math/matrix/ -I /home/patrick/COMP167/CompSci/math/complex/ -I /home/patrick/COMP167/CompSci/eigen/ -I /home/patrick/COMP167/CompSci/dsp/misc_fun/ -I /home/patrick/COMP167/CompSci/data_struct/lists -I /home/patrick/COMP167/graphics/pyplotcpp/ -I /usr/include/python2.7/ test_blp4.cpp -o lbf -lpython2.7
+                                                            

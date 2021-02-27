@@ -1,0 +1,12 @@
+
+//
+include<helper_fcn>
+
+namespace canal {
+
+  template<typename T>
+  const Vector<T> lseq(T first, T last, T delta) {
+    
+  }
+
+}

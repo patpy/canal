@@ -1,0 +1,608 @@
+/**
+ *@file matrix.hpp
+ *
+ *
+ *@brief This file contains prototypes for a matrix as a Vector of MahtVectors described in ...
+ *
+ *
+ *   
+ *@author Patrick Kasi
+ *
+ *@bug No known bugs.
+ */
+
+
+
+#ifndef _MATRIX_H_
+
+#define _MATRIX_H_
+
+#include <iostream>
+#include "math_vector.hpp"
+#include "complex.hpp"
+#include <Eigen/Eigenvalues>
+#include "vec_ops/lseq.hpp"
+
+
+
+namespace canal {
+namespace math {
+/**
+ * @brief Declares a Matrix object as a vector of a vector.
+ * The matrix object is inherited from the Vector object
+ * 
+ *
+ */
+template<class T>
+class Matrix : public Vector< Vector<T> >
+{
+protected:
+  //Vector<Vector<T>>* element;
+  unsigned int num_rows2;//refers to number Matrix rows
+
+  /**
+   *@brief Function used for pivoting during Gaussian Elimination
+   *@param Vector object
+   *@param unsigned int row number where search for max in vector starts
+   *return usnigned unsigned int
+   */
+  unsigned int get_max_val_index(const Vector<T>&, const unsigned int&);
+public:
+
+  /**
+   *@brief Constructor
+   *
+   *@details COnstructor that initalizes a matrix to zeros
+   *
+   *@params unsigned int
+   *@params unsigned int
+   */
+  Matrix(const unsigned int& m=0, const unsigned int& n=0);
+
+ 
+  Matrix(const Vector<Vector<T> >&)
+  {
+  }//implicit converter
+
+   /**
+   *@brief A more meaningful constructor that initalizes a matrix
+   *
+   *@params unsigned int
+   *@params unsigned int
+   @tparams T a real value which is set to all elements of a matrix
+   */
+  Matrix(const unsigned int&, const unsigned int&, const T&);
+
+   /**
+   *@brief A more meaningful constructor that initalizes a matrix
+   *
+   *
+   *@params unsigned int
+   @tparams Vector<T> a vector of real values which is set to all elements (columns) of a matrix
+   */
+  Matrix(const unsigned int&, const Vector<T>&);
+
+   /**
+   *@brief A copy constructor
+   *
+   *@tparams Matrix<T> a real values which is set to all elements of a matrix
+   */
+  Matrix(const Matrix<T>&);
+
+   /**
+   *@brief A destructor
+   *
+   */
+  ~Matrix()
+  {
+    
+  }
+
+  
+  void  set_num_rows()const;
+  unsigned int get_num_cols()const;
+  unsigned int get_num_rows()const;
+
+  /**
+   *@brief member function that enters an element into a desired position of a matrix
+   *
+   *@param unsigned int Row number
+   *@param unsigned int Column number
+   *@tparam T matrix entry element
+   */
+  void set_val(unsigned int, unsigned int, const T&);
+
+  /**
+   *@brief member function that enters more than one element into desired positions of a matrix
+   *
+   @param x Lseq type that specifies start index, end index and increment for rows
+   @param y Lseq type that specifies start index, end index and increment for columns
+   *
+   *  \code{.cpp}
+   *   canal::math::Matrix<double> m(5,5), n(3,1);
+   *   std::cout<< m << "\n";
+   *   std::cout<< n << "\n";
+   *   m.set(Lseq(2,4,1), Lseq(0,0,1), n);
+   *   std::cout<< m <<"\n";
+   *   \endcode
+   */
+  void set_val(Lseq, Lseq, const Matrix<T>&);
+
+  /**
+   *@brief Transpose a matrix
+   *
+   *tparam m Matrix object to transpose
+   *
+   *@return tranposed matrix object
+   */
+  const Matrix<T> transpose();
+  
+    /**
+   *@brief member function that enters a vector element into a desired position of a matrix
+   *
+   *@param unsigned int column number
+   *@tparam Vector<T> matrix column entry as a vector element
+   */
+  void set_val(unsigned int, const Vector<T>&);
+
+
+  /**
+   *@brief Read only operator
+   *
+   *@param unsigned int the ith colum of a matrix
+   *@return Vector<T>
+   *
+   *@overload
+   */
+  //const Vector<T>& operator[](unsigned int) const;
+  const Matrix<T>& operator=(const Matrix<T>&);
+
+  /**
+   *Addition Assignment operator that take a type T and adds to
+   *each elemnt of a Matrix object
+   *
+   *@overload
+   */  
+  const Matrix<T>& operator+=(const T&);
+
+  
+  /**
+   *Addition Assignment operator that take a Vector<T> and adds to
+   *each column of a Matrix object
+   *
+   *@overload
+   */
+  const Matrix<T>& operator+=(const Vector<T>&);
+
+  /**
+   *@brief Addition Assignment operator that take a Matrix and adds to the current  
+   * Matrix object
+   *
+   *@tparam m th input matrix of type T
+   *
+   *
+   *@return the current modified matrix object
+   *@overload
+   */
+  const Matrix<T>& operator+=(const Matrix<T>&);
+
+ /**
+   *Subtraction Assignment operator that take a type T and subtracts from 
+   *each elemnt of a Matrix object
+   *
+   *@overload
+   */
+  const Matrix<T>& operator-=(const T&);
+
+  
+  /**
+   *Subtracion Assignment operator that take a Vector<T> and subtracts from
+   *each column of a Matrix object
+   *
+   *@overload
+   */
+  const Matrix<T>& operator-=(const Vector<T>&);
+
+
+  /**
+   *Subtraction Assignment operator that take a Matrix and adds to a 
+   * Matrix
+   *
+   *@overload
+   */  
+  const Matrix<T>& operator-=(const Matrix<T>&);
+
+
+  
+  /**
+   *Addition Assignment operator that take a T and multiplies 
+   *each element of a Matrix object
+   *
+   *@overload
+   */
+  const Matrix<T>& operator*=(const T&);
+
+
+  /**
+   *Multiplication Assignment operator that take a math_vecto<T> and multiplies with 
+   * Matrix
+   *
+   *@overload
+   */  
+  const Matrix<T>& operator*=(const Vector<T>&);
+
+
+  /**
+   *Multiplication Assignment operator that take a Matrix and multiplies it with another  
+   * Matrix
+   *The current implementation is a naive approach which runs in O(N^3)
+   *Future version will take advantage of an efficient approach such as interfacing with LAPACK
+   *
+   *@param Matrix<T>
+   *return Matrix<T>
+   *@overload
+   */
+  const Matrix<T>& operator*=(const Matrix<T>&);
+
+  
+ 
+  /**
+   * @brief Mode Assignement Operator
+   * Operator inputs an integer and generates an identity matrix if size n X n
+   *
+   * @param integer
+   * @return Matrix<T>
+   *
+   * @overload
+   */
+  const Matrix<T>& operator%=(const unsigned int&);
+
+
+  /**
+   *@brief Division Assignement Operator
+   *
+   *@param T
+   *return Matrix<T>
+   *
+   */
+   const Matrix<T>& operator/=(const T&);  
+
+
+
+/**
+   *@brief << operator
+   *
+   *\brief user can use cout to display matrix object
+   */
+
+    friend std::ostream& operator << (std::ostream&out, const Matrix<T>&m) {
+	
+        std::cout<<"number of rows:" << m.get_num_rows()<<"\n";
+        std::cout<<"number of columns:" << m.get_num_cols()<<"\n";
+	for (auto n1 = m.get_num_rows(), i = n1*0; i < n1; i++) {
+	   for (auto n2 =  m.get_num_cols(), j = n2*0; j <  n2; j++) { 
+               out << m[j][i] <<" ";
+           }
+           out << "\n";
+        }
+  
+  return out;
+  }
+
+
+
+};
+
+template<class T> Matrix<T> Transpose(const Matrix<T>&);
+/**
+ *@brief Orthogonalization using Grahm-Schmidt algorithm.
+ *
+ *
+ *@param Mathvector<T>
+ *
+ *@param MatheVector<T>
+ *
+ *@return Matrix<T>
+ */    
+template<class T> Matrix<T> GrahmSchmidt(const Vector<T>&, const Vector<T>&);
+
+/**
+ *@brief Orthogonalization using Grahm-Schmidt algorithm.
+ *
+ *@param Matrix<T> A matrix of type T for example a double or float or unsigned int
+ *
+ *@return Matrix<T>
+ */
+template<class T> Matrix<T> GrahmSchmidt(const Matrix<T>&);
+
+
+/**
+ *@brief Generate a square matrix whose diagonals are equal to a and all other entires are zero
+ *@param matrix size
+ *@param a (value of diagonal value)
+ *@return Matrix<T>
+ */
+template<class T>
+Matrix<T> eye(const unsigned int, const T&);
+
+
+
+/**
+ *@brief Function computes LU decomposition of a square matrix
+ *
+ *@tparam Matrix<T> A square matrix
+ *@return List<Matrix<T>>
+ */
+/*
+template<class T >
+canal::dst::List<Matrix<T> > LUDecomposition(const Matrix<T>&);
+*/
+// -----------------------------Non Member Operator Functions-------------------------
+
+/**
+ *@brief Operator function * of Matrix object times a Matrix object
+ *
+ *@param Matrix<T>
+ *@param Matrix<T>
+ *@return Matrix<T>
+ */
+template<class T>
+Matrix<T> operator*(const Matrix<T>&, const Matrix<T>&);
+
+
+/**
+ *@brief Operator function * of Matrix object times a Vector object
+ *
+ *@param Matrix<T>
+ *@param Vector<T>
+ *@return Matrix<T>
+ */
+template<class T>
+Matrix<T> operator*(const Matrix<T>&, const Vector<T>&);
+
+
+/**
+ *
+ *@brief Operator to multiply a matrix by a constant
+ *
+ *@details Each matrix element is scaled by a constant
+ *
+ *@tparam m Matrix of type T
+ *@tparam t a real value of type T
+ *
+ *@return m A matrix of type T
+ */
+template<class T>
+Matrix<T> operator*(const Matrix<T>&, const T&);
+
+
+/**
+ *
+ *@brief Operator to multiply a constant by a matrix
+ *
+ *@details Each matrix element is scaled by a constant
+ *
+ *@tparam t a real value of type T
+ *
+ *@tparam m Matrix of type T
+ *
+ *@return m A matrix of type T
+ */
+template<class T>
+Matrix<T> operator*(const T&, const Matrix<T>&);
+
+
+
+/**
+ *
+ *@brief Operator to divide a matrix by a constant
+ *
+ *@details Each matrix element is scaled by a constant
+ *
+ *@tparam m Matrix of type T
+ *@tparam t a real value of type T
+ *
+ *@return m A matrix of type T
+ */
+template<class T>
+Matrix<T> operator/(const Matrix<T>&, const T&);
+
+
+/**
+ *
+ *@brief Operator to divide a constant by a matrix
+ *
+ *@details Each matrix element is scaled by a constant
+ *
+ *@tparam t a real value of type T
+ *
+ *@tparam m Matrix of type T
+ *
+ *@return m A matrix of type T
+ */
+template<class T>
+Matrix<T> operator/(const T&, const Matrix<T>&);
+
+
+/**
+ *
+ *@brief Operator to add a constant to a matrix
+ *
+ *@details Each matrix element is incremented by a constant
+ *
+ *@tparam m Matrix of type T
+ *@tparam t a real value of type T
+ *
+ *@return m A matrix of type T
+ */
+template<class T>
+Matrix<T> operator+(const Matrix<T>&, const T&);
+
+
+/**
+ *
+ *@brief Operator to add a matrix to constant
+ *
+ *@details Each matrix element is incremented by a constant
+ *
+ *@tparam m Matrix of type T
+ *@tparam t a real value of type T
+ *
+ *@return m A matrix of type T
+ */
+template<class T>
+Matrix<T> operator+(const T&, const Matrix<T>&);
+
+
+/**
+ *
+ *@brief Operator to add a matrix to constant
+ *
+ *@details Each matrix element is incremented by a constant
+ *
+ *@tparam v a Vector object of real value(s) of type T
+ *@tparam m Matrix of real values of type T
+ *
+ *@return m A matrix of type T
+ */
+template<class T>
+Matrix<T> operator+(const Vector<T>&, const Matrix<T>&);
+
+
+
+/**
+ *@brief Operator to add vector to each matrix column
+ *@tparam m Matrix object of type T
+ *
+ *@tparam v Vector object of type T
+ *
+ *@return m matrix object
+ */
+template<class T>
+Matrix<T> operator+(const Matrix<T>&, const Vector<T>&);
+
+
+
+
+/**
+ *@brief Operator to add vector to each matrix column
+ *@tparam m Matrix object of type T
+ *
+ *@tparam v Vector object of type T
+ *
+ *@return m matrix object
+ */
+template<class T>
+Matrix<T> operator+(const Vector<T>&, const Matrix<T>&);
+
+
+
+/**
+ *
+ *@brief Operator to add two matrices
+ *
+ *@tparam m Matrix object of type T
+ *
+ *@tparam n Matrix object of type T
+ *
+ *@return m Matrix object of type T
+ */
+template<class T>
+const Matrix<T> operator+(const Matrix<T>&, const Matrix<T>&);
+
+
+
+/**
+ *
+ *@brief Operator to subtract a constant to a matrix
+ *
+ *@details Each matrix element is decremented by a constant
+ *
+ *@tparam m Matrix of type T
+ *@tparam t a real value of type T
+ *
+ *@return m A matrix of type T
+ */
+template<class T>
+Matrix<T> operator-(const Matrix<T>&, const T&);
+
+
+/**
+ *
+ *@brief Operator to subtract a matrix from a real of type T
+ *
+ *@details Each matrix element is decremented by a constant
+ *
+ *@tparam t a real value of type T
+ *
+ *@tparam m Matrix of type T
+ *
+ *
+ *@return m A matrix of type T
+ */
+template<class T>
+Matrix<T> operator-(const T&t, const Matrix<T>&m);
+
+
+
+/**
+ *
+ *@brief Operator to subtract a vector object from a matrix
+ *
+ *@details Each matrix column is element-wise decremented by the input vector
+ *
+ *@tparam m a matrix type T
+ *
+ *@tparam v a vector of type T
+ *
+ *
+ *@return m A matrix of type T
+ */
+template<class T>
+Matrix<T> operator-(const Matrix<T>&, const Vector<T>&);
+
+
+
+
+/**
+ *@brief Operator function - of Matrix object minus a Matrix object
+ *
+ *@param Matrix<T>
+ *@param Matrix<T>
+ *@return Matrix<T>
+ */
+template<class T>
+const Matrix<T> operator-(const Matrix<T>&, const Matrix<T>&);
+
+
+/**
+ *@brief Ordinary function to compute eigenvalues of a matrix
+ *
+ *@details This fucntion relies on Eigen library to compute the eigen values. The current implementation of the Eigen C++ library assumes that a matrix is real 
+ *
+ *@tparam Matrix<T>
+ *@return Vector<mtco::Complex<T> >
+ *
+ */
+template<class T>
+const Vector<canal::math::Complex<T> > EigenVal(const Matrix<T>&);
+
+
+/**
+ *@brief matrix slicing function
+ *@details
+ *
+ *
+ *@tparam  m A matrix object Matrix<T> to be sliced
+ *@param x matrix row indexing Lseq type which provides start, end, and increment
+ *@param y matrix column indexing Lseq (linear sequence) type which provides start, end, and increment
+ 
+ *@return v a sliced matrix object 
+ */
+template<typename T>
+const Matrix<T> slice(const Matrix<T>&, const canal::Lseq&, const canal::Lseq&);
+
+}
+} //End Name space
+ #include "matrix.cpp"
+#endif

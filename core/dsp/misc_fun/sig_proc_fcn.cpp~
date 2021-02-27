@@ -1,0 +1,115 @@
+
+#include "sig_proc_fcn.hpp"
+namespace canal {
+namespace dsp {
+
+
+// --------------------------------Filter---------------------------
+template<typename T>
+canal::math::MathVector<T> filter_fun(const canal::math::MathVector<T>&bc,
+                                   const canal::math::MathVector<T>&ac,
+                                   const canal::math::MathVector<T>&x) {
+  unsigned int n = ac.get_dimension(), m = x.get_dimension();
+  canal::math::MathVector<T> z(n), y(m), b, a;
+  
+  // Normalize coefficients
+  b = bc/ac[0];
+  a = ac/ac[0];
+
+  for (unsigned int i = 0; i < m; i++) {
+    y.set(i, b[0]*x[i] + z[0]);
+    for (unsigned int j = 1; j < n; j++)
+      z.set(j-1, b[j]*x[i] + z[j] - a[j] * y[i]);
+  }
+  z = canal::math::slice_fun(z, 0, 1, n-1);
+ 
+  return y;
+  
+}
+
+
+// ----------------Freqz Function--------------------------
+
+template<typename T>
+std::tuple<canal::math::MathVector<T>,
+           canal::math::MathVector<canal::math::Complex<T> > >
+freqz_fun(const canal::math::MathVector<T>&b,
+          const canal::math::MathVector<T>&a, const T&fs, const unsigned int n) {
+ 
+  
+  throw_assert(b.get_dimension() == a.get_dimension(),
+               "Ploynomial vectors lengths must be the same");
+
+  // set interval dt
+  int dt = 1;
+
+  std::tuple<canal::math::MathVector<T>, canal::math::MathVector<canal::math::Complex<T>> > freqz_data;
+             
+  canal::math::Complex<T> c(b[0], 0);
+  canal::math::MathVector<canal::math::Complex<T>> unit_circ(n), h(n, c), v(n);
+  canal::math::MathVector<T> w("linspace", 0.0, M_PI, n+1), f(n), m(n);
+  // Declare poles and zeros
+  canal::math::MathVector<canal::math::Complex<T>> p(b.get_dimension()),
+             z(b.get_dimension());
+  
+  p = canal::math::roots_fun(a);
+  z = canal::math::roots_fun(b);
+  
+  // ignore last point in w
+  w = canal::math::slice_fun(w, 0, dt, n);
+  
+  // w = canal::math::real2complex();
+  f = w / M_PI * fs / T(2);
+  // exp_fun(vector of complex of form 0+ix)
+  
+  unit_circ = canal::math::exp_fun(canal::math::real2complex_fun(m, w));
+                                
+  // Zeros
+  for (unsigned int k = 0; k < z.get_dimension(); k++) {
+    v = unit_circ - z(k);
+    h = canal::math::elem_mult_fun(h, v);
+  }
+
+  // Poles
+  for (unsigned int k = 0; k < p.get_dimension(); k++) {
+    v = unit_circ - p(k);
+    h = canal::math::elem_div_fun(h, v);
+  }
+  
+  return std::make_tuple(f, h);
+    
+}
+
+
+template<typename T>
+const T angle(const canal::math::Complex<T>& c) {
+  T theta = 0;
+  /* 
+  if (c.re() > 0) {
+    theta = std::atan(c.im()/c.re());
+  } else if (c.re() < 0) {
+    theta = std::atan2(c.im(), c.re()) + M_PI;
+  }*/
+  theta = -std::atan2(c.im(), c.re());
+  // * 180 / M_PI;
+  return theta;
+}
+
+
+
+template<typename T>
+const canal::math::MathVector<T> angle(const canal::math::MathVector<
+                              canal::math::Complex<T>>&v) {
+
+  canal::math::MathVector<T> a_vec(v.get_dimension());
+  for (unsigned int i = 0; i < v.get_dimension(); i++) {
+    a_vec.set(i, angle(v[i]));
+  }
+
+  return a_vec;
+}
+
+
+}
+}
+// End Namespace

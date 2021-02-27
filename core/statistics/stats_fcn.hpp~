@@ -1,0 +1,42 @@
+/**
+ *@file stats_fcn.hpp
+ *@mainpage Statistics prototype file n
+ *This is a library of common statistics computations
+ *
+ *<p/><br/>
+ *@author Patrick Kasi
+ *@bug No known bug
+ */
+
+#include<math_vector.hpp>
+#ifndef _STATS_FCN_H
+#define _STATS_FCN_H
+
+namespace canal{
+namespace stats{
+
+/**
+ *@brief function to compute a mean value, of MathVector of type T of real numbers
+ *
+ *@tparams canal::math::MathVector<T>
+ *@return T
+ */
+template<typename T>
+T Mean(const canal::math::MathVector<T>&);
+
+/**
+ *@brief Function to compute the variance of MathVector of type T of real numbers
+ *
+ *@tparams canal::math::MathVector<T>
+ @tparams canal::math::MathVector<T>
+ @return T
+ */
+template<typename T>
+T Var(const canal::math::MathVector<T>&);
+
+}// End namespace
+}// End namespace
+
+#include "stats_fcn.cpp"
+
+#endif

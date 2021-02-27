@@ -1,0 +1,20 @@
+// Copyright
+
+
+
+#ifndef FREQZ_H
+#define FREQZ_H
+
+
+#include "core/math/math_vector.hpp"
+
+namespace canal{
+namespace dsp{
+
+template<class T> struct {
+
+  canal::math::Vector<T> F, Z;
+};
+
+}
+}

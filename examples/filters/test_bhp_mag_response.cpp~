@@ -1,0 +1,66 @@
+
+#include <iostream>
+#include <vector>
+#include<string>
+#include <matplotlibcpp.h>
+#include <dsp.hpp>
+namespace plt = matplotlibcpp;
+/*
+  ---------------IMPULSE RESPONSE OF BUTTERWORTH LOW PASS FILTER---------------------
+
+*/
+
+int main() {
+  std::cout<< "Frequency Response of a Butterworth High Pass Filter" << "\n";
+  
+  std::string colors[] = {"b", "g", "r", "c"};
+  unsigned int order[] = {2, 3, 5, 7}, n = 4, nn = 512;
+
+  // cutt-off
+  double fc = 40;
+
+  // sampling
+  double fs = 100;
+  csl::col::MathVector<double> a(3), b(3), f(nn);
+  csl::col::MathVector<csl::mfl::Complex<double>> h(nn);
+  std::vector<double> xx(nn), yy(nn);
+  std::tuple<csl::col::MathVector<double>,
+             csl::col::MathVector<csl::mfl::Complex<double>>> fqz_data;
+  
+  for (unsigned int i = 0; i < n; i++) {
+    
+    csl::spl::ButterHighPass<double> bhpf(order[i], fc, fs);
+    bhpf.design();
+  
+    // a = csl::spl::filt_a_coef_fun(bhpf);
+    // b = csl::spl::filt_b_coef_fun(bhpf);
+    a.set(0, 1.0); a.set(1, -1.5668683171334845); a.set(2, 0.9367557517676852);
+    b.set(0, 0.09247185865855016); b.set(1, 2*0.09247185865855016);
+    b.set(2, 0.09247185865855016);
+    
+    // call freqz
+    fqz_data = csl::spl::freqz_fun(b, a, fs, nn);
+    // Now plot impulse response
+    for (unsigned int j = 0; j < nn; j++) {
+      yy[j] = 20*std::log10(csl::mfl::abs(std::get<1>(fqz_data)[j]));
+      xx[j] = std::get<0>(fqz_data)[j];
+      
+    }
+
+    plt::plot(xx, yy, colors[i]);
+  }
+  
+  plt::ylabel("Power");
+  plt::xlabel("Frequency (Hz)");
+  plt::grid("True");
+  plt::save("./freq_response.png");
+  plt::show();
+
+   
+  
+  return 0;
+}
+
+
+// g++ -W -g -std=c++14 -I /home/patrick/COMP167/CompSci/ -I /home/patrick/COMP167/CompSci/dsp/iirFilter/ -I /home/patrick/COMP167/CompSci/math/ -I /home/patrick/COMP167/CompSci/math/vector/ -I /home/patrick/COMP167/CompSci/math/matrix/ -I /home/patrick/COMP167/CompSci/math/complex/ -I /home/patrick/COMP167/CompSci/eigen/ -I /home/patrick/COMP167/CompSci/dsp/ -I /home/patrick/COMP167/CompSci/dsp/misc_fun/ -I /home/patrick/COMP167/CompSci/data_struct/lists -I /home/patrick/COMP167/graphics/pyplotcpp/ -I /usr/include/python2.7/ test_bhp_mag_response.cpp -o lbf -lpython2.7
+                                                            

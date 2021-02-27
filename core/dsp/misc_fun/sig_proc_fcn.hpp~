@@ -1,0 +1,109 @@
+/**
+ *@file sig_proc_fcn.hpp
+ *
+ *@brief This is a library of useful sign processing
+ *
+ *
+ *@author Patrick Kasi
+ *
+ *@bug No known bug
+ */
+
+# ifndef _SIG_PROC_FCN_H
+#define _SIG_PROC_FCN_H
+
+// Use to cmath constants such as M_PI
+# define _USE_MATH_DEFINES
+
+#include <tuple>
+#include <cmath>
+#include "core/math/math_vector.hpp"
+#include "core/math/complex.hpp"
+#include "core/math/math_fcn.hpp"
+#include "freqz_dat.hpp"
+
+namespace canal {
+namespace dsp {
+
+
+/**
+ *@brief One dimension filter function
+ *@details
+ *
+ *Direct form II transposed
+ *
+ *@tparams Vector<T> polynomial coefficients of poles of filter
+ *@tparams Vector<T> polynomial coefficients of zeros of filter
+ *@tparams Vector<T> data to be filtered
+ *@return list<T> Return a list of vectors of type T. First element of list is the filtered data
+ * and second element is xxx
+ *
+ */
+template<typename T>
+canal::math::Vector<T> filter(const canal::math::Vector<T>&,
+                                   const canal::math::Vector<T>&,
+                                   const canal::math::Vector<T>&);
+
+
+/**
+ *@brief Frequency response of a discrete transfer function (filter z-transform)
+ *
+ *@detail Returns the N-point frequency
+ *	
+ *  Given numerator and denominator coefficients in vectors B and A. The
+ *  frequency response is evaluated at N points equally spaced around the
+ * upper half of the unit circle. If N isn't specified, it defaults to 512.
+ * filter uses N points around the whole unit circle.
+ * filter returns the frequency response at frequencies 
+ * designated in radians (normally between 0 and pi).
+ *
+ *@also filter
+ *
+ *@author P.K. Kasi
+ *
+ *@copyright (c) 2019-2020 by Patrick K Kasi
+ *@revision 1
+ *@date May 2020.
+ *
+ *@tparam b Vector<T> containing polynomials ('b' coefficients or zeros)
+ *@tparam a Vector<T> containing plynomials ('a' coefficients or poles)
+ *@tparam fs the sampling frequency (default setting is 1Hz)
+ *@param  n the length/number of frequencies points (default setting is 8192)
+ *
+ *@return  frz_data A data structure containing a vector of physical frequencies of type T and a vector of frequency
+ * responses of type complex of T of filter b/a:
+ * 	                            -1                -nb 
+ *	     jw	 B(z)   b(1) + b(2)z + .... + b(nb+1)z
+ *	  H(e) = ---- = ----------------------------
+ *	                            -1                -na
+ *	         A(z)    1   + a(2)z + .... + a(na+1)z
+ *
+ *@warning Throws if the size vector inputs 'b' and 'a' are not the same 
+ *
+ * 
+ */
+
+template<typename T>
+FreqzData<T>
+freqz(const canal::math::Vector<T>&b,
+          const canal::math::Vector<T>&a, const T&fs = 1, const int n = 8192);
+
+
+template<typename T>
+const T angle(const canal::math::Complex<T>&);
+
+
+template<typename T>
+const canal::math::Vector<T> angle(const canal::math::Vector<
+                              canal::math::Complex<T>>&);
+    
+
+
+
+}
+
+}
+// End Namespace
+
+ #include "sig_proc_fcn.cpp"
+#endif

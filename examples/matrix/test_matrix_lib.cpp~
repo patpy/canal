@@ -1,0 +1,78 @@
+#include <iostream>
+#include <cmath>
+#include "matrix.hpp"
+
+int main(int argc, char *argv[])
+{
+  MathObjects::Matrix<double> m(3,5,2.3);
+  MathObjects::disp_matrix(m);
+  m = m * 3.;
+  MathObjects::disp_matrix(m);
+  //Orhtogonolize vectors
+  MathObjects::Matrix<double> m2(2,2,1.);
+  m2.set_val(0, 1, 2.);
+  m2.set_val(1, 0, 2.);
+  m2.set_val(1,1, 3.);
+  MathObjects::disp_matrix(m2);
+  //m2 = MathObjects::GrahmSchmidt(m2);
+  //m2 = m2.house_holder(m2);
+  m2 = MathObjects::HouseHolder(m2);
+  MathObjects::disp_matrix(m2);
+  MathObjects::Matrix<double> md, mm, mv;
+  md = MathObjects::eye(3,2.);
+  MathObjects::MathVector<double> v(2);
+  v.set(0,2.0); v.set(1,1.0);
+  MathObjects::disp_matrix(md);
+
+
+
+
+  //test matrix time a vector
+  MathObjects::Matrix<double> mt(3,2,1);
+  mt.set_val(0, 0,2);
+  mt.set_val(0, 1, 3);
+  mt.set_val(2,1, 2);
+  MathObjects::disp_matrix(mt);
+  MathObjects::disp_vector(v);
+  //mt*=v;
+  mv = mt * v;
+  mt = mv;
+  std::cout<<"matrix timex a vector"<<"\n";
+  MathObjects::disp_matrix(mt);
+
+  std::cout<<"Matrix times matrix"<<"\n";
+  mm = md*mt;
+  MathObjects::disp_matrix(mm);
+ 
+  //Test matrix times a vector
+
+
+
+  //Test LU decomposition
+  std::cout<<"Testing LU decomposition of a Square Matrix"<<"\n";
+  double arr[16] = {2,1,1,0,4,3,3,1,8,7,9,5,6,7,9,8};
+  int k = 0, n = 4;
+  MathObjects::Matrix<double> ml(n,n,0.);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      ml.set_val(i, j, arr[k]);
+      k++;
+    }
+
+  }
+
+  MathObjects::disp_matrix(ml);
+  MathObjects::LUDecomposition(ml);
+  
+  return 0;
+}
+//g++ -W -g -I /home/patrick/COMP167/math/vector/ -I /home/patrick/COMP167/math/matrix/ -I /home/patrick/COMP167/cpp_utilities/ -std=c++14 test_mat.cpp -o tm
+
+/*
+ m = [ 1 2 
+2 3 ]
+
+m_ortho = [
+1 0.4 
+2 -0.2]
+*/

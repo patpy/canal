@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/patrick/COMP167/CANAL/math/math_vector.cpp
+math_vector.hpp
+-
+
+/home/patrick/COMP167/CANAL/math/math_vector.hpp
+cmath
+-
+string
+-
+ThrowAssert.hpp
+-
+math_vector.cpp
+/home/patrick/COMP167/CANAL/math/math_vector.cpp
+
+/home/patrick/COMP167/cpp_utilities/ThrowAssert.hpp
+exception
+-
+string
+-
+sstream
+-
+iostream
+-
+
+/home/patrick/COMP167/test_lib/vector/main_math_vec.cpp
+iostream
+-
+math_vector.hpp
+-
+
